@@ -3,8 +3,10 @@
 
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>PeakSet · Registro de entrenamiento</title>
+  <meta name="description" content="PeakSet: registro de entrenamiento de fuerza con un solo toque.">
+  <meta name="theme-color" content="#09384B">
 
   <!-- Fuente Inter (guía de estilos 4.1.2) -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -16,28 +18,31 @@
 
 <body>
 
+  <!-- 5.4: enlace para saltar la navegación con teclado -->
+  <a id="skip" class="skip" href="#v-role">Saltar al contenido</a>
+
   <!-- ========== HU-051: Elegir perspectiva (pantalla de entrada) ========== -->
-  <main id="v-role" class="role" aria-labelledby="t-role">
+  <main id="v-role" class="role" aria-labelledby="t-role" tabindex="-1">
     <div class="role-top">
       <p class="crumb">PeakSet / Elegir perspectiva</p>
       <button id="b-app" class="btn primary" type="button" aria-haspopup="dialog">Descargar app</button>
     </div>
-    <h1 id="t-role">Elige tu perspectiva</h1>
+    <h1 id="t-role" tabindex="-1">Elige tu perspectiva</h1>
     <p class="lead">Tu cuenta está lista. Selecciona cómo quieres usar PeakSet para continuar.</p>
 
     <div class="role-grid">
-      <section class="card">
-        <h2>Quiero entrenar</h2>
+      <section class="card" aria-labelledby="t-atleta">
+        <h2 id="t-atleta">Quiero entrenar</h2>
         <img class="photo" src="assets/images/atleta.jpg" alt="Atleta con barra en el gimnasio">
         <p>Rutinas guiadas · Registro rápido · Tu progreso en un solo lugar.</p>
-        <button class="btn primary" data-role="atleta">Comenzar como atleta</button>
+        <button class="btn primary" type="button" data-role="atleta">Comenzar como atleta</button>
       </section>
 
-      <section class="card">
-        <h2>Soy entrenador</h2>
+      <section class="card" aria-labelledby="t-entrenador">
+        <h2 id="t-entrenador">Soy entrenador</h2>
         <img class="photo" src="assets/images/entrenador.jpg" alt="Entrenador supervisando a un cliente">
         <p>Supervisa clientes · Ajusta cargas · Gestiona cada sesión.</p>
-        <button class="btn primary" data-role="entrenador">Comenzar como entrenador</button>
+        <button class="btn primary" type="button" data-role="entrenador">Comenzar como entrenador</button>
       </section>
     </div>
 
@@ -51,7 +56,7 @@
   <div id="app" class="app" hidden>
 
     <!-- Barra lateral -->
-    <aside class="side">
+    <aside class="side" aria-label="Menú de PeakSet">
       <div class="brand">
         <img src="assets/icons/logo-blanco.svg" alt="" width="48" height="30">
         <span>PeakSet</span>
@@ -73,12 +78,12 @@
         <button id="b-switch" class="btn" type="button">Cambiar perspectiva</button>
       </header>
 
-      <main class="content">
+      <main class="content" tabindex="-1">
 
         <!-- ===== Entrenamiento: HU-001, 002, 003, 004, 005, 007, 014, 015, 016, 017, 019, 027, 028, 029, 031 ===== -->
         <section id="v-train" class="view" aria-labelledby="t-train">
           <p class="eyebrow">Ana Torres · Piernas A</p>
-          <h1 id="t-train">Registra tu siguiente serie</h1>
+          <h1 id="t-train" tabindex="-1">Registra tu siguiente serie</h1>
 
           <div class="cols">
 
@@ -88,22 +93,23 @@
               <p id="ex-meta"></p>
 
               <div class="panels">
-                <div class="panel">
-                  <span>Carga</span>
+                <div class="panel" role="group" aria-labelledby="l-load">
+                  <span id="l-load">Carga</span>
                   <output id="load" class="big" aria-live="polite">60 kg</output>
                   <div class="steps">
-                    <button class="btn" data-load="-2.5">− 2,5</button>
-                    <button class="btn" data-load="2.5">+ 2,5</button>
+                    <button class="btn" type="button" data-load="-2.5" aria-label="Bajar la carga 2,5 kilos">− 2,5</button>
+                    <button class="btn" type="button" data-load="2.5" aria-label="Subir la carga 2,5 kilos">+ 2,5</button>
                   </div>
                 </div>
 
-                <div class="panel" id="reps-panel" tabindex="0"
-                     aria-label="Repeticiones: desliza hacia arriba o abajo, usa la rueda del mouse o las flechas del teclado">
-                  <span>Repeticiones</span>
+                <div class="panel" id="reps-panel" tabindex="0" role="group"
+                     aria-labelledby="l-reps" aria-describedby="reps-help">
+                  <span id="l-reps">Repeticiones</span>
+                  <span id="reps-help" class="sr-only">Desliza la cifra hacia arriba o abajo, usa la rueda del mouse o las flechas del teclado.</span>
                   <output id="reps" class="big" aria-live="polite">8</output>
                   <div class="steps">
-                    <button class="btn" data-reps="-1">− 1</button>
-                    <button class="btn" data-reps="1">+ 1</button>
+                    <button class="btn" type="button" data-reps="-1" aria-label="Quitar una repetición">− 1</button>
+                    <button class="btn" type="button" data-reps="1" aria-label="Sumar una repetición">+ 1</button>
                   </div>
                 </div>
               </div>
@@ -115,7 +121,7 @@
 
               <div class="row3">
                 <button id="b-repeat" class="btn">Repetir serie</button>
-                <button class="btn" type="button" aria-disabled="true" title="Disponible en una próxima versión">Guía técnica</button>
+                <button class="btn" type="button" aria-disabled="true" aria-describedby="soon">Guía técnica</button>
                 <button id="b-hist" class="btn" aria-expanded="false" aria-controls="inline-hist">Historial</button>
               </div>
 
@@ -134,12 +140,12 @@
 
               <div class="card">
                 <h3>Series de este ejercicio</h3>
-                <table>
+                <table aria-label="Series de este ejercicio">
                   <thead>
                     <tr>
-                      <th>Serie</th>
-                      <th>Carga × reps</th>
-                      <th>Estado / descanso</th>
+                      <th scope="col">Serie</th>
+                      <th scope="col">Carga × reps</th>
+                      <th scope="col">Estado / descanso</th>
                     </tr>
                   </thead>
                   <tbody id="sets"></tbody>
@@ -157,14 +163,14 @@
 
         <!-- ===== Rutina: HU-026, 029 ===== -->
         <section id="v-routine" class="view" hidden aria-labelledby="t-routine">
-          <h1 id="t-routine">Tu rutina de hoy</h1>
+          <h1 id="t-routine" tabindex="-1">Tu rutina de hoy</h1>
           <ol id="routine" class="card list"></ol>
         </section>
 
 
         <!-- ===== Historial y progreso: HU-031, 032, 033, 036 ===== -->
         <section id="v-history" class="view" hidden aria-labelledby="t-history">
-          <h1 id="t-history">Historial</h1>
+          <h1 id="t-history" tabindex="-1">Historial</h1>
 
           <div class="cols">
             <div class="card">
@@ -193,44 +199,45 @@
 
         <!-- ===== Panel del entrenador: HU-039, 040, 041, 044, 045, 046 ===== -->
         <section id="v-clients" class="view" hidden aria-labelledby="t-clients">
-          <h1 id="t-clients">Clientes asignados</h1>
+          <h1 id="t-clients" tabindex="-1">Clientes asignados</h1>
 
           <!-- HU-044: filtro por grupo muscular -->
           <div class="chips" role="group" aria-label="Filtrar por grupo muscular">
-            <button class="chip on" data-f="Todos">Todos</button>
-            <button class="chip" data-f="Piernas">Piernas</button>
-            <button class="chip" data-f="Espalda">Espalda</button>
+            <button class="chip on" type="button" aria-pressed="true" data-f="Todos">Todos</button>
+            <button class="chip" type="button" aria-pressed="false" data-f="Piernas">Piernas</button>
+            <button class="chip" type="button" aria-pressed="false" data-f="Espalda">Espalda</button>
           </div>
 
           <div class="cols">
             <!-- HU-039 y HU-041: lista de clientes con su carga -->
             <div class="card">
-              <table>
-                <thead>
-                  <tr>
-                    <th>Cliente</th>
-                    <th>Grupo</th>
-                    <th>Ejercicio</th>
-                    <th>Carga actual</th>
-                    <th></th>
+              <!-- 5.2: en móvil cada fila se muestra como ficha; los roles conservan la semántica de tabla -->
+              <table class="stack" role="table" aria-label="Clientes asignados">
+                <thead role="rowgroup">
+                  <tr role="row">
+                    <th role="columnheader" scope="col">Cliente</th>
+                    <th role="columnheader" scope="col">Grupo</th>
+                    <th role="columnheader" scope="col">Ejercicio</th>
+                    <th role="columnheader" scope="col">Carga actual</th>
+                    <th role="columnheader" scope="col"><span class="sr-only">Acciones</span></th>
                   </tr>
                 </thead>
-                <tbody id="clients"></tbody>
+                <tbody id="clients" role="rowgroup"></tbody>
               </table>
             </div>
 
             <!-- HU-040, 045, 046: editar carga, repeticiones y series -->
-            <div class="card" id="editor" hidden aria-live="polite">
-              <h2 id="ed-name"></h2>
+            <div class="card" id="editor" hidden role="region" aria-labelledby="ed-name">
+              <h2 id="ed-name" tabindex="-1"></h2>
 
               <label>Carga (kg)
-                <input id="ed-load" type="number" step="2.5" min="0">
+                <input id="ed-load" type="number" inputmode="decimal" step="2.5" min="0" aria-describedby="ed-msg">
               </label>
               <label>Repeticiones
-                <input id="ed-reps" type="number" min="1">
+                <input id="ed-reps" type="number" inputmode="numeric" min="1" aria-describedby="ed-msg">
               </label>
               <label>Series
-                <input id="ed-sets" type="number" min="1">
+                <input id="ed-sets" type="number" inputmode="numeric" min="1" aria-describedby="ed-msg">
               </label>
 
               <button id="ed-save" class="btn primary">Guardar cambios</button>
@@ -263,9 +270,9 @@
 
       <!-- HU-010: ajustar tiempo. "Pausar" es solo visual (HU-012 no está en las 30) -->
       <div class="steps3">
-        <button class="btn" type="button" aria-disabled="true" title="Disponible en una próxima versión">Pausar</button>
-        <button class="btn" data-rest="-30">− 30 s</button>
-        <button class="btn" data-rest="30">+ 30 s</button>
+        <button class="btn" type="button" aria-disabled="true" aria-describedby="soon">Pausar</button>
+        <button class="btn" type="button" data-rest="-30" aria-label="Restar 30 segundos al descanso">− 30 s</button>
+        <button class="btn" type="button" data-rest="30" aria-label="Sumar 30 segundos al descanso">+ 30 s</button>
       </div>
 
       <!-- HU-009: silenciar sonido y mantener vibración -->
@@ -310,10 +317,14 @@
 
   <!-- HU-003 y HU-007: confirmación con opción de corregir o deshacer -->
   <div id="toast" class="toast" role="status" aria-live="polite" hidden>
+    <span id="toast-ico" class="toast-ico" aria-hidden="true">i</span>
     <span id="toast-txt"></span>
-    <button id="fix" class="link">Corregir</button>
-    <button id="undo" class="link">Deshacer</button>
+    <button id="fix" class="link" type="button">Corregir</button>
+    <button id="undo" class="link" type="button">Deshacer</button>
   </div>
+
+  <!-- 5.4: descripción de los botones que aún no están disponibles -->
+  <p id="soon" hidden>Disponible en una próxima versión</p>
 
   <script src="js/main.js"></script>
 </body>

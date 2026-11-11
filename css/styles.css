@@ -1,5 +1,5 @@
 /* =========================================================
-   PeakSet · Hoja de estilos (Landing Page Desktop)
+   PeakSet · Hoja de estilos (Landing Page Desktop + Responsive)
    Basada en la guía de estilos 4.1 del informe
    ========================================================= */
 
@@ -41,7 +41,7 @@
 }
 
 html {
-  font-size: 16px;
+  font-size: 100%;                 /* 16 px por defecto; respeta el tamaño de texto del navegador (5.4) */
 }
 
 body {
@@ -664,4 +664,603 @@ svg text {
   list-style: none;
   color: var(--bruma);
   font-size: 0.9375rem;
+}
+
+
+/* =========================================================
+   PARTE 2 · 5.2 Responsive · 5.3 Interacciones · 5.4 Accesibilidad
+   Estas reglas se suman a las de escritorio (secciones 1 a 19).
+   ========================================================= */
+
+
+/* ---------- 20. Accesibilidad: tokens y utilidades (5.4) ---------- */
+:root {
+  --borde: #6A9BAC;      /* borde de controles: 3,4:1 sobre tarjeta, 4,1:1 sobre fondo (WCAG 1.4.11) */
+  --nav-h: 72px;         /* alto de la navegación inferior en móvil */
+}
+
+/* Texto solo para lectores de pantalla */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* Enlace "Saltar al contenido": aparece al recibir el foco (WCAG 2.4.1) */
+.skip {
+  position: absolute;
+  top: var(--s);
+  left: var(--s);
+  z-index: 20;
+  padding: 12px 16px;
+  border-radius: 12px;
+  background: #FFFFFF;
+  color: var(--tinta);
+  font-weight: 600;
+  transform: translateY(-200%);
+}
+
+.skip:focus {
+  transform: none;
+}
+
+/* Anillo de foco doble (blanco + tinta): se ve sobre fondos oscuros, turquesa, acento y blanco */
+:focus-visible {
+  outline: 3px solid #FFFFFF;
+  outline-offset: 2px;
+  box-shadow: 0 0 0 2px var(--tinta);
+}
+
+.toast :focus-visible,
+.skip:focus-visible {
+  outline-color: var(--tinta);
+  box-shadow: 0 0 0 2px #FFFFFF;
+}
+
+/* Los títulos reciben el foco al cambiar de vista, sin mostrar anillo */
+h1[tabindex="-1"]:focus {
+  outline: 0;
+  box-shadow: none;
+}
+
+/* El foco nunca queda tapado por la navegación inferior (WCAG 2.4.11) */
+html {
+  scroll-padding-bottom: calc(var(--nav-h) + 96px);
+}
+
+
+/* ---------- 21. Accesibilidad: contraste (5.4) ---------- */
+
+/* Borde de los controles con contraste >= 3:1 respecto de su fondo */
+.btn,
+.chip,
+.cal-d,
+input,
+select {
+  border-color: var(--borde);
+}
+
+.btn.primary,
+.chip.on,
+.cal-d.on {
+  border-color: var(--acc);
+}
+
+/* Texto secundario sobre turquesa: Bruma daba 1,99:1; Tinta da 4,58:1 */
+.card.teal .small,
+.card.teal .hint,
+.card.teal .eyebrow {
+  color: var(--tinta);
+}
+
+/* Superficies sobre turquesa: se aclaran en vez de oscurecerse para que el texto Tinta supere 4,5:1 */
+.card.teal .btn {
+  border-color: var(--tinta);            /* 5,7:1 respecto del botón */
+  background: rgba(255, 255, 255, 0.16);
+}
+
+.card.teal .btn:hover {
+  background: rgba(255, 255, 255, 0.28);
+}
+
+.card.teal .btn.primary {
+  border-color: var(--tinta);
+  background: var(--acc);
+}
+
+.card.teal .btn.primary:hover {
+  background: #90B6F0;
+}
+
+.card.teal .panel .btn {
+  border-color: var(--acc);
+  background: var(--card);
+}
+
+.card.teal .suggest,
+.card.teal .plain li,
+#nav button {
+  background: rgba(255, 255, 255, 0.16);
+}
+
+#nav button[aria-current="page"] {
+  background: var(--acc);
+  font-weight: 600;
+}
+
+/* El estado deshabilitado no depende solo de la opacidad */
+.btn[aria-disabled="true"] {
+  border-style: dashed;
+  cursor: not-allowed;
+}
+
+.btn:disabled {
+  opacity: 0.6;
+  border-style: dashed;
+  cursor: not-allowed;
+}
+
+/* El paso actual de la rutina se marca con texto y borde, no solo con color */
+#routine li[aria-current="step"] {
+  padding-left: var(--s);
+  border-left: 4px solid var(--acc);
+}
+
+
+/* ---------- 22. Accesibilidad: áreas táctiles de 48 px (5.4) ---------- */
+.chip,
+.cal-d,
+.top .btn,
+.suggest .btn {
+  min-height: 48px;
+}
+
+.link {
+  min-height: 48px;
+  padding: 0 var(--s);
+}
+
+.suggest .btn {
+  margin: var(--s) 0 0 var(--s);
+}
+
+.chips {
+  flex-wrap: wrap;
+}
+
+.chk {
+  min-height: 48px;
+}
+
+.chk input {
+  width: 24px;
+  height: 24px;
+}
+
+
+/* ---------- 23. Interacciones: estados y microanimaciones (5.3) ---------- */
+
+/* Todas las transiciones duran menos de 300 ms (guía 4.1.5) */
+.btn,
+.chip,
+.cal-d,
+#nav button {
+  transition: background 0.2s, border-color 0.2s, transform 0.1s;
+}
+
+/* Respuesta inmediata al toque: el control se hunde levemente */
+.btn:active,
+.chip:active,
+.cal-d:active,
+#nav button:active {
+  transform: scale(0.97);
+}
+
+.btn[aria-disabled="true"]:active,
+.btn:disabled:active {
+  transform: none;
+}
+
+.chip:hover,
+.cal-d:hover {
+  background: #12566B;
+}
+
+.chip.on:hover,
+.cal-d.on:hover {
+  background: #90B6F0;
+}
+
+#nav button:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+#nav button[aria-current="page"]:hover {
+  background: #90B6F0;
+}
+
+/* Día elegido en el calendario */
+.cal-d[aria-pressed="true"] {
+  outline: 3px solid #FFFFFF;
+  outline-offset: -3px;
+}
+
+/* La métrica "late" cuando cambia la carga o las repeticiones */
+@keyframes bump {
+  50% { transform: scale(1.12); }
+}
+
+.big.bump {
+  animation: bump 0.18s ease-out;
+}
+
+.panel .big {
+  white-space: nowrap;
+}
+
+/* Entrada de vistas, ventanas y aviso */
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(8px); }
+}
+
+@keyframes fade {
+  from { opacity: 0; }
+}
+
+@keyframes toast-in {
+  from { opacity: 0; transform: translate(-50%, 16px); }
+}
+
+.view,
+.role {
+  animation: fade-up 0.22s ease-out;
+}
+
+.modal {
+  animation: fade 0.18s ease-out;
+}
+
+.modal .card {
+  animation: fade-up 0.22s ease-out;
+}
+
+.toast {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px var(--s);
+  max-width: calc(100vw - 32px);
+  animation: toast-in 0.22s ease-out;
+}
+
+/* Ícono del aviso: el estado no se comunica solo con color */
+.toast-ico {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--tinta);
+  color: #FFFFFF;
+  font-size: 0.875rem;
+}
+
+.toast[data-kind="ok"] .toast-ico {
+  background: #15803D;
+}
+
+/* Gesto de repeticiones: solo la cifra captura el deslizamiento,
+   así el resto del panel permite desplazar la página en pantallas táctiles */
+#reps-panel {
+  touch-action: auto;
+}
+
+#reps-panel .big {
+  touch-action: none;
+}
+
+/* La ventana nunca supera el alto de la pantalla */
+.modal {
+  padding: var(--s);
+  overflow-y: auto;
+}
+
+.modal .card {
+  max-height: calc(100dvh - 16px);
+  margin: 0;
+  overflow-y: auto;
+}
+
+.clock {
+  font-size: clamp(3.5rem, 18vw, 5rem);
+  line-height: 1.1;
+}
+
+
+/* ---------- 24. Responsive: tipografía y tablas fluidas (5.2) ----------
+   Puntos de quiebre en em (1 em = 16 px): 25 em = 400 px, 35 em = 560 px,
+   48 em = 768 px, 68.75 em = 1100 px, 80 em = 1280 px. Al usar em, el diseño
+   también se adapta cuando el usuario agranda el texto del navegador. */
+h1 {
+  font-size: clamp(1.75rem, 1.2rem + 2.4vw, 2.5rem);
+}
+
+h2 {
+  font-size: clamp(1.25rem, 1.1rem + 0.8vw, 1.5rem);
+}
+
+img,
+svg {
+  max-width: 100%;
+}
+
+.table-wrap {
+  overflow-x: auto;
+}
+
+/* Escritorio compacto (hasta 1280 px): la métrica se ajusta a la columna */
+@media (min-width: 68.8125em) and (max-width: 80em) {
+  .big {
+    font-size: 3rem;
+  }
+
+  .big.sm {
+    font-size: 2rem;
+  }
+}
+
+
+/* ---------- 25. Responsive: tablet (hasta 1100 px) ---------- */
+@media (max-width: 68.75em) {
+  .app {
+    grid-template-columns: 208px 1fr;
+  }
+
+  .cols {
+    grid-template-columns: 1fr;          /* el panel lateral pasa debajo del contenido */
+  }
+
+  .content {
+    padding: calc(var(--s) * 3);
+  }
+
+  .top {
+    padding: calc(var(--s) * 2) calc(var(--s) * 3);
+  }
+
+  .role {
+    padding: calc(var(--s) * 4);
+  }
+}
+
+
+/* ---------- 26. Responsive: móvil (hasta 768 px) ---------- */
+@media (max-width: 48em) {
+
+  /* Retícula de 4 columnas con márgenes de 16 px (guía 4.1.4) */
+  .app {
+    display: block;
+    padding-bottom: calc(var(--nav-h) + env(safe-area-inset-bottom));
+  }
+
+  .content,
+  .role {
+    padding: calc(var(--s) * 2);
+  }
+
+  .top {
+    gap: var(--s);
+    padding: var(--s) calc(var(--s) * 2);
+  }
+
+  .card {
+    padding: calc(var(--s) * 2);
+  }
+
+  /* La barra lateral se convierte en navegación inferior, al alcance del pulgar */
+  .side {
+    position: fixed;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 5;
+    display: block;
+    padding: var(--s) var(--s) calc(var(--s) + env(safe-area-inset-bottom));
+    box-shadow: 0 -2px 12px rgba(3, 32, 44, 0.4);
+  }
+
+  .side .brand,
+  .side .user {
+    display: none;
+  }
+
+  #nav {
+    grid-auto-flow: column;
+    grid-auto-columns: 1fr;
+  }
+
+  #nav button {
+    padding: 0 var(--s);
+    font-size: 0.875rem;
+    line-height: 1.2;
+    text-align: center;
+  }
+
+  /* Acción principal fija en el tercio inferior (zona del pulgar) */
+  #b-register {
+    position: sticky;
+    bottom: calc(var(--nav-h) + env(safe-area-inset-bottom) + var(--s));
+    z-index: 2;
+    box-shadow: 0 6px 16px rgba(3, 32, 44, 0.45);
+  }
+
+  .photo {
+    height: 200px;
+  }
+
+  /* El aviso ocupa el ancho disponible, encima de la navegación */
+  .toast {
+    bottom: calc(var(--nav-h) + env(safe-area-inset-bottom) + var(--s));
+    width: calc(100vw - 32px);
+  }
+
+  th,
+  td {
+    padding: 12px var(--s);
+  }
+
+  /* Tabla de clientes: cada fila se muestra como una ficha */
+  .stack thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+  }
+
+  .stack tr {
+    display: block;
+    padding: var(--s) 0;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .stack td {
+    display: flex;
+    justify-content: space-between;
+    gap: calc(var(--s) * 2);
+    padding: 6px 0;
+    border: 0;
+    text-align: right;
+  }
+
+  .stack td::before {
+    content: attr(data-label);
+    color: var(--bruma);
+    text-align: left;
+  }
+
+  .stack td:last-child {
+    display: block;
+  }
+
+  .stack td:last-child::before {
+    content: none;
+  }
+
+  .stack td .btn {
+    width: 100%;
+    margin-top: var(--s);
+  }
+
+  #b-next,
+  #b-finish,
+  #ed-save,
+  .modal .btn {
+    width: 100%;
+  }
+
+  /* Las ventanas se anclan abajo (zona del pulgar) y el aviso sube para no tapar sus botones */
+  .modal {
+    place-items: end center;
+  }
+
+  .modal:not([hidden]) ~ .toast {
+    top: var(--s);
+    bottom: auto;
+  }
+
+  #b-next,
+  #b-finish {
+    margin-bottom: var(--s);
+  }
+
+  .steps3 .btn {
+    padding: 0 var(--s);
+  }
+}
+
+
+/* ---------- 27. Responsive: móvil pequeño (hasta 560 px) ---------- */
+@media (max-width: 35em) {
+  .role-grid,
+  .panels {
+    grid-template-columns: 1fr;          /* una sola columna */
+  }
+
+  .role-top {
+    flex-wrap: wrap;
+  }
+
+  .calendar {
+    gap: 4px;
+  }
+}
+
+@media (max-width: 25em) {
+  .row3 {
+    grid-template-columns: 1fr;
+  }
+
+  .top .btn {
+    padding: 0 12px;
+  }
+}
+
+
+/* ---------- 28. Responsive: pantallas muy bajas (móvil horizontal o zoom alto) ---------- */
+@media (max-width: 48em) and (max-height: 30em) {
+  .app {
+    padding-bottom: 0;
+  }
+
+  .side {
+    position: static;                    /* la navegación deja de ser fija para no tapar el contenido */
+    box-shadow: none;
+  }
+
+  #b-register {
+    position: static;
+    box-shadow: none;
+  }
+
+  .toast {
+    bottom: var(--s);
+  }
+
+  html {
+    scroll-padding-bottom: 0;
+  }
+}
+
+
+/* ---------- 29. Preferencias del usuario (5.4) ---------- */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition: none !important;
+    animation: none !important;
+  }
+}
+
+/* Modo de alto contraste del sistema (Windows): se conservan bordes y foco */
+@media (forced-colors: active) {
+  .btn,
+  .chip,
+  .cal-d,
+  .card,
+  .panel,
+  .toast {
+    border: 1px solid;
+  }
+
+  #nav button[aria-current="page"],
+  .chip.on,
+  .cal-d.on {
+    border: 3px solid;
+  }
 }

@@ -1,5 +1,5 @@
 /* =========================================================
-   PeakSet · Lógica de la Landing Page (Desktop)
+   PeakSet · Lógica de la Landing Page (Desktop + Responsive)
    HU: 001-005, 007-011, 014-017, 019, 026-029, 031-033,
        036, 039-041, 044-046, 051
    ========================================================= */
@@ -80,7 +80,12 @@ const completedExercises = () =>
 
 let toastTimer;
 
-function showToast(text, withActions) {
+function showToast(text, withActions, kind) {
+  // 5.3 / 5.4: el aviso lleva ícono además de texto ('ok' = confirmación, 'info' = aviso)
+  $('toast').dataset.kind = kind || 'info';
+  $('toast-ico').textContent = kind === 'ok' ? '✓' : 'i';
+  $('toast').hidden = true;                    // reinicia la animación de entrada
+  void $('toast').offsetWidth;
   $('toast-txt').textContent = text;
   $('undo').hidden = !withActions;
   if ($('fix')) {
@@ -95,6 +100,27 @@ function showToast(text, withActions) {
 }
 
 
+// 5.3: la cifra "late" brevemente cuando cambia (retroalimentación visual inmediata)
+function setMetric(id, text) {
+  const el = $(id);
+  if (el.textContent === text) {
+    return;
+  }
+  el.textContent = text;
+  el.classList.remove('bump');
+  void el.offsetWidth;                         // reinicia la animación
+  el.classList.add('bump');
+}
+
+// 5.4: mientras hay una ventana abierta, el resto de la página queda inerte
+// (sin foco ni lectura); el aviso con «Corregir» y «Deshacer» sigue disponible
+function setBackgroundInert(on) {
+  $('app').inert = on;
+  $('v-role').inert = on;
+  $('skip').inert = on;
+}
+
+
 /* ---------- 4. Entrada y navegación (HU-051) ---------- */
 document.querySelectorAll('[data-role]').forEach((button) => {
   button.addEventListener('click', () => {
@@ -104,7 +130,7 @@ document.querySelectorAll('[data-role]').forEach((button) => {
     $('app').hidden = false;
 
     buildNav();
-    goTo(state.role === 'atleta' ? 'train' : 'clients');
+    goTo(state.role === 'atleta' ? 'train' : 'clients', true);
   });
 });
 
@@ -112,11 +138,11 @@ function buildNav() {
   $('user-name').textContent = state.role === 'atleta' ? 'Ana Torres' : 'Entrenador';
 
   $('nav').innerHTML = NAV_ITEMS[state.role]
-    .map(([key, label]) => `<li><button data-go="${key}">${label}</button></li>`)
+    .map(([key, label]) => `<li><button type="button" data-go="${key}">${label}</button></li>`)
     .join('');
 }
 
-function goTo(view) {
+function goTo(view, moveFocus) {
   // Mostrar solo la vista elegida
   document.querySelectorAll('.view').forEach((section) => {
     section.hidden = section.id !== 'v-' + view;
@@ -132,6 +158,7 @@ function goTo(view) {
   });
 
   $('crumb').textContent = 'PeakSet / ' + VIEW_TITLES[view];
+  document.title = VIEW_TITLES[view] + ' · PeakSet';          // 5.4: título de página por vista (WCAG 2.4.2)
 
   const renderers = {
     train: renderTrain,
@@ -140,13 +167,19 @@ function goTo(view) {
     clients: renderClients
   };
   renderers[view]();
+
+  // 5.4: al cambiar de vista, el foco pasa al título para teclado y lectores de pantalla
+  if (moveFocus) {
+    window.scrollTo(0, 0);
+    $('t-' + view).focus({ preventScroll: true });
+  }
 }
 
 // Cualquier elemento con data-go navega a esa vista
 document.addEventListener('click', (event) => {
   const target = event.target.closest('[data-go]');
   if (target) {
-    goTo(target.dataset.go);
+    goTo(target.dataset.go, true);
   }
 });
 
@@ -163,8 +196,8 @@ function renderTrain() {
     `Serie ${Math.min(done + 1, ex.sets)} de ${ex.sets} · ` +
     `Objetivo: ${ex.reps} repeticiones`;
 
-  $('load').textContent = fmt(state.load) + ' kg';
-  $('reps').textContent = state.reps;
+  setMetric('load', fmt(state.load) + ' kg');
+  setMetric('reps', String(state.reps));
   $('b-register').textContent = state.editing ? 'Actualizar serie' : 'Registrar serie';
 
   // HU-029: progreso de la sesión
@@ -283,11 +316,11 @@ function registerSet(load, reps) {
   // HU-031: al registrar la última serie de la rutina, la sesión se cierra sola
   if (completedSets() === TOTAL_SETS) {
     finishSession();
-    showToast('Rutina completada: la sesión se cerró automáticamente.');
+    showToast('Rutina completada: la sesión se cerró automáticamente.', false, 'ok');
     return;
   }
 
-  showToast(`Serie ${state.sets[state.exercise].length} registrada · ${fmt(load)} kg × ${reps}`, true); // HU-007
+  showToast(`Serie ${state.sets[state.exercise].length} registrada · ${fmt(load)} kg × ${reps}`, true, 'ok'); // HU-007
   startRest();                                                                                           // HU-008
 }
 
@@ -312,7 +345,7 @@ $('b-register').addEventListener('click', () => {
   state.lastSet = { load: last.load, reps: last.reps };
 
   renderTrain();
-  showToast(`Serie actualizada · ${fmt(last.load)} kg × ${last.reps}`);
+  showToast(`Serie actualizada · ${fmt(last.load)} kg × ${last.reps}`, false, 'ok');
 });
 
 $('b-repeat').addEventListener('click', () => {
@@ -411,6 +444,7 @@ function startRest() {
   state.restStart = Date.now();
 
   $('rest').hidden = false;
+  setBackgroundInert(true);
   $('rest-sub').textContent =
     `${ex.name} · ${fmt(last.load)} kg × ${last.reps} · Serie ${done} guardada`;
   $('rest-foot').textContent =
@@ -486,6 +520,7 @@ function closeRest(discard) {
   clearInterval(state.restTimer);
   state.restTimer = null;
   $('rest').hidden = true;
+  setBackgroundInert(false);
 
   if (!discard) {
     const set = state.sets[state.exercise].slice(-1)[0];
@@ -586,7 +621,7 @@ function drawCalendar() {
   const days = Array.from({ length: daysInMonth }, (_, i) => {
     const day = i + 1;
     const trained = PAST_SESSIONS.some((s) => s.day === day);
-    return `<button class="cal-d${trained ? ' on' : ''}" data-day="${day}" ` +
+    return `<button type="button" class="cal-d${trained ? ' on' : ''}" data-day="${day}" aria-pressed="false" ` +
            `aria-label="${day} de octubre${trained ? ', con entrenamiento' : ''}">${day}</button>`;
   }).join('');
 
@@ -598,6 +633,9 @@ $('calendar')?.addEventListener('click', (event) => {
   if (!button) {
     return;
   }
+
+  // 5.3 / 5.4: marca el día elegido
+  document.querySelectorAll('.cal-d').forEach((d) => d.setAttribute('aria-pressed', String(d === button)));
 
   const day = Number(button.dataset.day);
   const session = PAST_SESSIONS.find((s) => s.day === day);
@@ -615,9 +653,13 @@ function renderClients() {
   $('clients').innerHTML = CLIENTS
     .filter((c) => activeFilter === 'Todos' || c.group === activeFilter)
     .map((c) =>
-      `<tr><td>${c.name}</td><td>${c.group}</td><td>${c.exercise}</td>` +
-      `<td>${fmt(c.load)} kg × ${c.reps}</td>` +
-      `<td><button class="btn" data-client="${c.name}">Editar</button></td></tr>`
+      // data-label: rótulo de cada dato cuando la fila se muestra como ficha en móvil (5.2)
+      `<tr role="row"><td role="cell" data-label="Cliente">${c.name}</td>` +
+      `<td role="cell" data-label="Grupo">${c.group}</td>` +
+      `<td role="cell" data-label="Ejercicio">${c.exercise}</td>` +
+      `<td role="cell" data-label="Carga actual">${fmt(c.load)} kg × ${c.reps}</td>` +
+      `<td role="cell"><button class="btn" type="button" data-client="${c.name}" ` +
+      `aria-label="Editar a ${c.name}">Editar</button></td></tr>`
     ).join('');
 
   document.querySelectorAll('[data-client]').forEach((button) => {
@@ -629,7 +671,10 @@ function renderClients() {
 document.querySelectorAll('.chip').forEach((chip) => {
   chip.addEventListener('click', () => {
     activeFilter = chip.dataset.f;
-    document.querySelectorAll('.chip').forEach((c) => c.classList.toggle('on', c === chip));
+    document.querySelectorAll('.chip').forEach((c) => {
+      c.classList.toggle('on', c === chip);
+      c.setAttribute('aria-pressed', String(c === chip));      // 5.4: estado para lectores de pantalla
+    });
     renderClients();
   });
 });
@@ -646,6 +691,10 @@ function openEditor(name) {
   $('ed-sets').value = client.sets;
   $('ed-msg').textContent = '';
   $('ed-hist').innerHTML = PAST_SESSIONS.map((s) => `<li>${s.date}: ${s.text}</li>`).join('');
+
+  // 5.2 / 5.4: en móvil el editor queda debajo de la lista; se lleva el foco y la vista hasta él
+  $('ed-name').focus({ preventScroll: true });
+  $('editor').scrollIntoView({ block: 'nearest' });
 }
 
 // HU-045 y HU-046: modificar carga, repeticiones y series con validación
@@ -656,9 +705,13 @@ $('ed-save').addEventListener('click', () => {
 
   if (!(load >= 0) || reps < 1 || sets < 1) {
     $('ed-msg').textContent = 'Revisa los valores: carga ≥ 0, repeticiones y series ≥ 1.';
+    [['ed-load', load >= 0], ['ed-reps', reps >= 1], ['ed-sets', sets >= 1]].forEach(([id, ok]) => {
+      $(id).setAttribute('aria-invalid', String(!ok));         // 5.4: marca el campo con error
+    });
     return;
   }
 
+  ['ed-load', 'ed-reps', 'ed-sets'].forEach((id) => $(id).removeAttribute('aria-invalid'));
   Object.assign(state.selectedClient, { load, reps, sets });
   $('ed-msg').textContent = `Cambios aplicados: ${fmt(load)} kg × ${reps} · ${sets} series.`;
   renderClients();
@@ -670,11 +723,13 @@ const appModal = $('app-modal');
 
 function closeAppModal() {
   appModal.hidden = true;
+  setBackgroundInert(false);
   $('b-app').focus();
 }
 
 $('b-app')?.addEventListener('click', () => {
   appModal.hidden = false;
+  setBackgroundInert(true);
   $('app-close').focus();
 });
 
@@ -683,6 +738,8 @@ $('app-close')?.addEventListener('click', closeAppModal);
 document.addEventListener('keydown', (event) => {
   if (event.key === 'Escape' && appModal && !appModal.hidden) {
     closeAppModal();
+  } else if (event.key === 'Escape' && !$('rest').hidden) {
+    closeRest(false);                          // 5.3: Esc equivale a «Finalizar descanso»
   }
 });
 
@@ -693,5 +750,45 @@ $('b-switch')?.addEventListener('click', () => {
   state.role = null;
   $('app').hidden = true;
   $('v-role').hidden = false;
-  document.querySelector('#v-role [data-role]').focus();   // foco en la primera opción
+  document.title = 'PeakSet · Registro de entrenamiento';
+  window.scrollTo(0, 0);
+  $('t-role').focus({ preventScroll: true });               // 5.4: foco en el título de la pantalla
+});
+
+
+/* ---------- 13. Interacciones y accesibilidad adicionales (5.3 y 5.4) ---------- */
+
+// Enlace «Saltar al contenido»: lleva el foco a la zona principal visible
+$('skip').addEventListener('click', (event) => {
+  event.preventDefault();
+  const target = $('v-role').hidden ? document.querySelector('.content') : $('v-role');
+  target.focus();
+});
+
+// Botones aún no disponibles: en vez de no responder, explican por qué
+document.querySelectorAll('.btn[aria-disabled="true"]').forEach((button) => {
+  button.addEventListener('click', () => {
+    showToast(`«${button.textContent.trim()}» estará disponible en una próxima versión.`);
+  });
+});
+
+// Clic fuera de la ventana de descarga: la cierra
+appModal?.addEventListener('click', (event) => {
+  if (event.target === appModal) {
+    closeAppModal();
+  }
+});
+
+// El aviso no desaparece mientras el puntero o el foco están sobre él (WCAG 2.2.1)
+['pointerenter', 'focusin'].forEach((type) => {
+  $('toast').addEventListener(type, () => clearTimeout(toastTimer));
+});
+
+['pointerleave', 'focusout'].forEach((type) => {
+  $('toast').addEventListener(type, () => {
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => {
+      $('toast').hidden = true;
+    }, 3000);
+  });
 });
